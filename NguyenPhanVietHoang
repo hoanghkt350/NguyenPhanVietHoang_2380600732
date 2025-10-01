@@ -1,0 +1,144 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace NguyenPhanVietHoang
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        // Sự kiện Click cho Menu "Tạo văn bản mới" 
+        private void taoVanBanMoiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rtbContent.Clear();
+            rtbContent.Font = new Font("Tahoma", 14);
+        }
+
+        // Sự kiện Click cho Menu "Mở tập tin"
+        private void moTapTinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            // Lọc chỉ hiện các file .txt hoặc .rtf
+            openFile.Filter = "Text Files (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf";
+
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // Load file dựa vào đuôi file
+                    if (Path.GetExtension(openFile.FileName).ToLower() == ".rtf")
+                    {
+                        rtbContent.LoadFile(openFile.FileName, RichTextBoxStreamType.RichText);
+                    }
+                    else
+                    {
+                        rtbContent.LoadFile(openFile.FileName, RichTextBoxStreamType.PlainText);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi mở tệp: " + ex.Message);
+                }
+            }
+        }
+
+        // Sự kiện Click cho Menu "Lưu nội dung văn bản"
+        private void luuNoiDungVanBanToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFile = new SaveFileDialog();
+            saveFile.Filter = "Text Files (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf";
+
+            if (saveFile.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // Lưu file dựa vào đuôi file người dùng chọn
+                    if (Path.GetExtension(saveFile.FileName).ToLower() == ".rtf")
+                    {
+                        rtbContent.SaveFile(saveFile.FileName, RichTextBoxStreamType.RichText);
+                    }
+                    else
+                    {
+                        rtbContent.SaveFile(saveFile.FileName, RichTextBoxStreamType.PlainText);
+                    }
+                    MessageBox.Show("Đã lưu tệp thành công!");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi lưu tệp: " + ex.Message);
+                }
+            }
+        }
+
+        // Sự kiện Click cho Menu "Thoát"
+        private void thoatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+        // Sự kiện Click cho Menu "Font..."
+        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FontDialog fontDlg = new FontDialog();
+            // Hiển thị màu sắc
+            fontDlg.ShowColor = true;
+
+            // Áp dụng font hiện tại của vùng chọn vào dialog
+            if (rtbContent.SelectionFont != null)
+            {
+                fontDlg.Font = rtbContent.SelectionFont;
+            }
+            else
+            {
+                fontDlg.Font = rtbContent.Font;
+            }
+
+            if (fontDlg.ShowDialog() == DialogResult.OK)
+            {
+                // Thay đổi font và màu cho vùng văn bản đang được chọn
+                rtbContent.SelectionFont = fontDlg.Font;
+                rtbContent.SelectionColor = fontDlg.Color;
+            }
+        }
+        private void ApplyFontStyleToSelection(FontStyle style)
+        {
+            if (rtbContent.SelectionFont != null)
+            {
+                // Lấy font hiện tại của vùng chọn
+                Font currentFont = rtbContent.SelectionFont;
+
+                // Tạo font mới bằng cách thêm hoặc bớt style
+                // Sử dụng toán tử XOR (^) để bật/tắt style
+                FontStyle newFontStyle = currentFont.Style ^ style;
+
+                rtbContent.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newFontStyle);
+            }
+        }
+        // Sự kiện Click cho nút Bold
+        private void tsbBold_Click(object sender, EventArgs e)
+        {
+            ApplyFontStyleToSelection(FontStyle.Bold);
+        }
+
+        // Sự kiện Click cho nút Italic
+        private void tsbItalic_Click(object sender, EventArgs e)
+        {
+            ApplyFontStyleToSelection(FontStyle.Italic);
+        }
+
+        // Sự kiện Click cho nút Underline
+        private void tsbUnderline_Click(object sender, EventArgs e)
+        {
+            ApplyFontStyleToSelection(FontStyle.Underline);
+        }
+    }
+}
